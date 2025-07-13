@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 
 # Import game API
-from .game_api import router as game_router
+from game_api import router as game_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
