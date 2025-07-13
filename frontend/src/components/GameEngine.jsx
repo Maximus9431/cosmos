@@ -113,8 +113,8 @@ const GameEngine = ({
     });
     
     game.spaceship = new THREE.Mesh(spaceshipGeometry, spaceshipMaterial);
-    game.spaceship.position.set(0, 0, 5);
-    game.spaceship.rotation.x = Math.PI / 2;
+    game.spaceship.position.set(0, 0, 0); // Position at center, closer to camera
+    game.spaceship.rotation.x = Math.PI / 2; // Point forward
     game.spaceship.castShadow = true;
     game.scene.add(game.spaceship);
     
@@ -127,8 +127,10 @@ const GameEngine = ({
     });
     
     const engineGlow = new THREE.Mesh(glowGeometry, glowMaterial);
-    engineGlow.position.set(0, 0, -1);
+    engineGlow.position.set(0, 0, 1); // Behind the spaceship
     game.spaceship.add(engineGlow);
+    
+    console.log('✅ Spaceship created at position:', game.spaceship.position);
   };
 
   const createAsteroid = (x, y, z) => {
