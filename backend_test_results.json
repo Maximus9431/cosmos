@@ -1,0 +1,173 @@
+{
+  "summary": {
+    "total_tests": 23,
+    "passed_tests": 21,
+    "failed_tests": 2,
+    "success_rate": 91.30434782608695,
+    "duration": 27.057467460632324,
+    "backend_url": "https://e36461d1-ac20-4222-9165-b86dc889a0a1.preview.emergentagent.com/api"
+  },
+  "test_results": [
+    {
+      "test": "Root Endpoint",
+      "success": true,
+      "message": "Root endpoint working: Cosmic Defender API is running!",
+      "timestamp": "2025-07-13T13:47:33.813966",
+      "response_data": null
+    },
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "Health check passed: {'status': 'healthy', 'service': 'cosmic-defender-api'}",
+      "timestamp": "2025-07-13T13:47:37.987107",
+      "response_data": null
+    },
+    {
+      "test": "Create Player",
+      "success": true,
+      "message": "Player created successfully: CosmicWarrior2025 (ID: 8aee1570-554e-4d7a-9834-80e458f22a29)",
+      "timestamp": "2025-07-13T13:47:38.039093",
+      "response_data": null
+    },
+    {
+      "test": "Duplicate Player Handling",
+      "success": true,
+      "message": "Duplicate player correctly returned existing player",
+      "timestamp": "2025-07-13T13:47:38.060932",
+      "response_data": null
+    },
+    {
+      "test": "Get Player by ID",
+      "success": false,
+      "message": "Get player failed: HTTPSConnectionPool(host='e36461d1-ac20-4222-9165-b86dc889a0a1.preview.emergentagent.com', port=443): Read timed out. (read timeout=10)",
+      "timestamp": "2025-07-13T13:47:48.081995",
+      "response_data": null
+    },
+    {
+      "test": "Get Non-existent Player",
+      "success": true,
+      "message": "Non-existent player correctly returned 404",
+      "timestamp": "2025-07-13T13:47:56.565832",
+      "response_data": null
+    },
+    {
+      "test": "Update Player",
+      "success": true,
+      "message": "Player updated successfully",
+      "timestamp": "2025-07-13T13:47:56.618125",
+      "response_data": null
+    },
+    {
+      "test": "Start Game Session",
+      "success": true,
+      "message": "Game session started: 99d53a61-ce90-43f2-b308-5e8f7767af3c",
+      "timestamp": "2025-07-13T13:48:00.310526",
+      "response_data": null
+    },
+    {
+      "test": "Get Game Session",
+      "success": true,
+      "message": "Game session retrieved: active",
+      "timestamp": "2025-07-13T13:48:00.341032",
+      "response_data": null
+    },
+    {
+      "test": "Update Game Session",
+      "success": true,
+      "message": "Game session updated successfully",
+      "timestamp": "2025-07-13T13:48:00.401305",
+      "response_data": null
+    },
+    {
+      "test": "End Game Session",
+      "success": false,
+      "message": "End game failed: 500",
+      "timestamp": "2025-07-13T13:48:00.467648",
+      "response_data": null
+    },
+    {
+      "test": "Get Non-existent Game",
+      "success": true,
+      "message": "Non-existent game correctly returned 404",
+      "timestamp": "2025-07-13T13:48:00.509413",
+      "response_data": null
+    },
+    {
+      "test": "Get Leaderboard",
+      "success": true,
+      "message": "Leaderboard retrieved: 1 total entries",
+      "timestamp": "2025-07-13T13:48:00.542583",
+      "response_data": null
+    },
+    {
+      "test": "Leaderboard with Limit",
+      "success": true,
+      "message": "Limited leaderboard working: 1 entries",
+      "timestamp": "2025-07-13T13:48:00.561201",
+      "response_data": null
+    },
+    {
+      "test": "Leaderboard with Player Rank",
+      "success": true,
+      "message": "Player rank retrieved: 1",
+      "timestamp": "2025-07-13T13:48:00.622583",
+      "response_data": null
+    },
+    {
+      "test": "Get All Achievements",
+      "success": true,
+      "message": "Retrieved 10 achievements",
+      "timestamp": "2025-07-13T13:48:00.644293",
+      "response_data": null
+    },
+    {
+      "test": "Get Achievements with Progress",
+      "success": true,
+      "message": "Player achievements: 4 unlocked",
+      "timestamp": "2025-07-13T13:48:00.661978",
+      "response_data": null
+    },
+    {
+      "test": "Get Player Achievements Endpoint",
+      "success": true,
+      "message": "Player achievements endpoint working: 10 achievements",
+      "timestamp": "2025-07-13T13:48:00.679927",
+      "response_data": null
+    },
+    {
+      "test": "Get Player Stats",
+      "success": true,
+      "message": "Stats retrieved - Games: 6, Best Score: 15000, Achievements: 4/10",
+      "timestamp": "2025-07-13T13:48:00.708357",
+      "response_data": null
+    },
+    {
+      "test": "Get Non-existent Player Stats",
+      "success": true,
+      "message": "Non-existent player stats correctly returned 404",
+      "timestamp": "2025-07-13T13:48:00.726045",
+      "response_data": null
+    },
+    {
+      "test": "Invalid Endpoint",
+      "success": true,
+      "message": "Invalid endpoint correctly returned 404",
+      "timestamp": "2025-07-13T13:48:00.741843",
+      "response_data": null
+    },
+    {
+      "test": "Invalid Player Data",
+      "success": true,
+      "message": "Invalid player data correctly returned 422",
+      "timestamp": "2025-07-13T13:48:00.761518",
+      "response_data": null
+    },
+    {
+      "test": "Game with Invalid Player",
+      "success": true,
+      "message": "Game creation with invalid player correctly returned 404",
+      "timestamp": "2025-07-13T13:48:00.778610",
+      "response_data": null
+    }
+  ]
+}
