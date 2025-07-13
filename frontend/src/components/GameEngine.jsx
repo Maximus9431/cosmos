@@ -46,10 +46,10 @@ const GameEngine = ({
     game.scene = new THREE.Scene();
     game.scene.background = new THREE.Color(0x000011);
     
-    // Camera setup
+    // Camera setup - position camera to look down at the game area
     game.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    game.camera.position.set(0, 5, 10);
-    game.camera.lookAt(0, 0, 0);
+    game.camera.position.set(0, 8, 12); // Higher up and further back
+    game.camera.lookAt(0, 0, 0); // Look at center
     
     // Renderer setup
     game.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -62,30 +62,45 @@ const GameEngine = ({
     const starCount = 1000;
     const starPositions = new Float32Array(starCount * 3);
     
-    for (let i = 0; i < starCount * 3; i++) {
-      starPositions[i] = (Math.random() - 0.5) * 200;
+    for (let i = 0; i < starCount * 3; i += 3) {
+      starPositions[i] = (Math.random() - 0.5) * 200;     // x
+      starPositions[i + 1] = (Math.random() - 0.5) * 200; // y
+      starPositions[i + 2] = (Math.random() - 0.5) * 100 - 50; // z (behind camera)
     }
     
     starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    const starMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.5 });
+    const starMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.8 });
     const stars = new THREE.Points(starGeometry, starMaterial);
     game.scene.add(stars);
     
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+    // Lighting - Add more ambient light
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6); // Increased intensity
     game.scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0); // Increased intensity
     directionalLight.position.set(10, 10, 5);
     directionalLight.castShadow = true;
     game.scene.add(directionalLight);
     
+    // Add a point light for better object visibility
+    const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+    pointLight.position.set(0, 10, 10);
+    game.scene.add(pointLight);
+    
     // Create spaceship
     createSpaceship();
+    
+    // Add some initial objects for testing
+    createAsteroid(-3, 0, -5);
+    createAsteroid(3, 2, -8);
+    createEnemy(0, -2, -10);
     
     if (mountRef.current) {
       mountRef.current.appendChild(game.renderer.domElement);
     }
+    
+    console.log('✅ Scene initialized with camera at:', game.camera.position);
+    console.log('✅ Scene object count:', game.scene.children.length);
     
     // Handle window resize
     const handleResize = () => {
