@@ -355,14 +355,14 @@ const GameEngine = ({
     // Collision detection
     checkCollisions();
     
-    // Spawn objects
+    // Spawn objects every 2 seconds
     game.spawnTimer += deltaTime;
-    if (game.spawnTimer > 1000) {
+    if (game.spawnTimer > 2000) {
       spawnObjects();
       game.spawnTimer = 0;
     }
     
-    // Update wave
+    // Update wave every 30 seconds
     game.waveTimer += deltaTime;
     if (game.waveTimer > 30000) {
       game.wave++;
