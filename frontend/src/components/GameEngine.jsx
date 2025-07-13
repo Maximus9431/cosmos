@@ -176,7 +176,7 @@ const GameEngine = ({
   const createEnemy = (x, y, z) => {
     const game = gameRef.current;
     
-    const enemyGeometry = new THREE.BoxGeometry(0.8, 0.4, 1.2);
+    const enemyGeometry = new THREE.BoxGeometry(1.0, 0.6, 1.5); // Slightly larger
     const enemyMaterial = new THREE.MeshPhongMaterial({ 
       color: 0xff4444,
       shininess: 50
@@ -195,6 +195,7 @@ const GameEngine = ({
     
     game.scene.add(enemy);
     game.enemies.push(enemy);
+    console.log('✅ Enemy created at:', enemy.position);
   };
 
   const createPowerUp = (x, y, z) => {
