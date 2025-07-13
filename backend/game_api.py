@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 import asyncio
 
-from .models import (
+from models import (
     Player, PlayerCreate, PlayerUpdate,
     GameSession, GameSessionCreate, GameSessionUpdate,
     Score, ScoreCreate,
@@ -11,7 +11,7 @@ from .models import (
     Achievement, AchievementWithStatus,
     GameStats, DetailedStats
 )
-from .database import (
+from database import (
     players_collection, game_sessions_collection, scores_collection,
     achievements_collection, player_achievements_collection,
     get_player_by_username, create_player, update_player,
