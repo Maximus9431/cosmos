@@ -151,7 +151,7 @@ const GameEngine = ({
   const createAsteroid = (x, y, z) => {
     const game = gameRef.current;
     
-    const asteroidGeometry = new THREE.DodecahedronGeometry(Math.random() * 0.5 + 0.3);
+    const asteroidGeometry = new THREE.DodecahedronGeometry(Math.random() * 0.5 + 0.5); // Slightly larger
     const asteroidMaterial = new THREE.MeshPhongMaterial({ 
       color: 0x8B4513,
       flatShading: true
@@ -170,6 +170,7 @@ const GameEngine = ({
     
     game.scene.add(asteroid);
     game.asteroids.push(asteroid);
+    console.log('✅ Asteroid created at:', asteroid.position);
   };
 
   const createEnemy = (x, y, z) => {
