@@ -1,108 +1,246 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { mockLeaderboard, mockPlayerStats, mockAchievements } from '../data/mock';
+import { leaderboardAPI, playerAPI, achievementAPI } from '../services/api';
+import { useToast } from '../hooks/use-toast';
 
-const MainMenu = ({ onStartGame, onShowInstructions }) => {
+const MainMenu = ({ onStartGame, onShowInstructions, currentPlayer, apiConnected }) => {
   const [activeTab, setActiveTab] = useState('play');
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [playerStats, setPlayerStats] = useState(null);
+  const [achievements, setAchievements] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  // Load data when tab changes or player changes
+  useEffect(() => {
+    if (apiConnected && currentPlayer) {
+      loadData();
+    }
+  }, [activeTab, currentPlayer, apiConnected]);
+
+  const loadData = async () => {
+    if (!apiConnected || !currentPlayer) return;
+
+    setLoading(true);
+    try {
+      switch (activeTab) {
+        case 'leaderboard':
+          await loadLeaderboard();
+          break;
+        case 'stats':
+          await loadPlayerStats();
+          break;
+        case 'achievements':
+          await loadAchievements();
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadLeaderboard = async () => {
+    try {
+      const data = await leaderboardAPI.getLeaderboard(10, 0, currentPlayer.id);
+      setLeaderboard(data.entries || []);
+    } catch (error) {
+      console.error('Error loading leaderboard:', error);
+      toast({
+        title: "Loading Error",
+        description: "Failed to load leaderboard data",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const loadPlayerStats = async () => {
+    try {
+      const data = await playerAPI.getPlayerStats(currentPlayer.id);
+      setPlayerStats(data);
+    } catch (error) {
+      console.error('Error loading player stats:', error);
+      toast({
+        title: "Loading Error",
+        description: "Failed to load player statistics",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const loadAchievements = async () => {
+    try {
+      const data = await achievementAPI.getAchievements(currentPlayer.id);
+      setAchievements(data || []);
+    } catch (error) {
+      console.error('Error loading achievements:', error);
+      toast({
+        title: "Loading Error",
+        description: "Failed to load achievements",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const formatScore = (score) => {
+    return score?.toLocaleString() || '0';
+  };
+
+  const formatTime = (seconds) => {
+    if (!seconds) return '0s';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    } else {
+      return `${remainingSeconds}s`;
+    }
+  };
 
   const renderLeaderboard = () => (
     <div className="space-y-3">
       <h3 className="text-xl font-bold text-cyan-400 font-mono mb-4">TOP PILOTS</h3>
-      <div className="space-y-2 max-h-96 overflow-y-auto">
-        {mockLeaderboard.map((entry, index) => (
-          <Card key={entry.id} className="bg-gray-800 border-gray-600 p-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                  index === 0 ? 'bg-yellow-500 text-black' : 
-                  index === 1 ? 'bg-gray-400 text-black' : 
-                  index === 2 ? 'bg-orange-600 text-white' : 
-                  'bg-gray-600 text-white'
-                }`}>
-                  {index + 1}
+      {loading ? (
+        <div className="text-center text-gray-400 font-mono">Loading leaderboard...</div>
+      ) : leaderboard.length === 0 ? (
+        <div className="text-center text-gray-400 font-mono">No scores yet. Be the first to play!</div>
+      ) : (
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {leaderboard.map((entry, index) => (
+            <Card key={entry.player_id} className="bg-gray-800 border-gray-600 p-3">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                    index === 0 ? 'bg-yellow-500 text-black' : 
+                    index === 1 ? 'bg-gray-400 text-black' : 
+                    index === 2 ? 'bg-orange-600 text-white' : 
+                    'bg-gray-600 text-white'
+                  }`}>
+                    {entry.rank}
+                  </div>
+                  <div>
+                    <div className="text-white font-mono font-bold">{entry.player_username}</div>
+                    <div className="text-gray-400 text-sm font-mono">
+                      Wave {entry.wave} • {formatTime(entry.game_duration)}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-white font-mono font-bold">{entry.name}</div>
-                  <div className="text-gray-400 text-sm font-mono">{entry.date}</div>
+                <div className="text-cyan-400 font-mono font-bold text-lg">
+                  {formatScore(entry.score)}
                 </div>
               </div>
-              <div className="text-cyan-400 font-mono font-bold text-lg">
-                {entry.score.toLocaleString()}
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 
-  const renderStats = () => (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-cyan-400 font-mono mb-4">YOUR STATS</h3>
-      <div className="grid grid-cols-2 gap-4">
+  const renderStats = () => {
+    if (loading) {
+      return <div className="text-center text-gray-400 font-mono">Loading statistics...</div>;
+    }
+
+    if (!playerStats) {
+      return <div className="text-center text-gray-400 font-mono">No statistics available</div>;
+    }
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-xl font-bold text-cyan-400 font-mono mb-4">YOUR STATS</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="bg-gray-800 border-gray-600 p-4">
+            <div className="text-gray-400 text-sm font-mono">GAMES PLAYED</div>
+            <div className="text-white text-2xl font-bold font-mono">{playerStats.game_stats.total_games}</div>
+          </Card>
+          <Card className="bg-gray-800 border-gray-600 p-4">
+            <div className="text-gray-400 text-sm font-mono">BEST SCORE</div>
+            <div className="text-cyan-400 text-2xl font-bold font-mono">{formatScore(playerStats.game_stats.best_score)}</div>
+          </Card>
+          <Card className="bg-gray-800 border-gray-600 p-4">
+            <div className="text-gray-400 text-sm font-mono">TOTAL SCORE</div>
+            <div className="text-white text-2xl font-bold font-mono">{formatScore(playerStats.game_stats.total_score)}</div>
+          </Card>
+          <Card className="bg-gray-800 border-gray-600 p-4">
+            <div className="text-gray-400 text-sm font-mono">AVERAGE</div>
+            <div className="text-white text-2xl font-bold font-mono">{formatScore(Math.floor(playerStats.game_stats.average_score))}</div>
+          </Card>
+        </div>
         <Card className="bg-gray-800 border-gray-600 p-4">
-          <div className="text-gray-400 text-sm font-mono">GAMES PLAYED</div>
-          <div className="text-white text-2xl font-bold font-mono">{mockPlayerStats.gamesPlayed}</div>
+          <div className="text-gray-400 text-sm font-mono">TOTAL PLAYTIME</div>
+          <div className="text-white text-xl font-bold font-mono">{formatTime(playerStats.game_stats.total_playtime)}</div>
         </Card>
         <Card className="bg-gray-800 border-gray-600 p-4">
-          <div className="text-gray-400 text-sm font-mono">BEST SCORE</div>
-          <div className="text-cyan-400 text-2xl font-bold font-mono">{mockPlayerStats.bestScore.toLocaleString()}</div>
+          <div className="text-gray-400 text-sm font-mono">BEST WAVE</div>
+          <div className="text-yellow-400 text-xl font-bold font-mono">{playerStats.game_stats.best_wave}</div>
         </Card>
         <Card className="bg-gray-800 border-gray-600 p-4">
-          <div className="text-gray-400 text-sm font-mono">TOTAL SCORE</div>
-          <div className="text-white text-2xl font-bold font-mono">{mockPlayerStats.totalScore.toLocaleString()}</div>
-        </Card>
-        <Card className="bg-gray-800 border-gray-600 p-4">
-          <div className="text-gray-400 text-sm font-mono">AVERAGE</div>
-          <div className="text-white text-2xl font-bold font-mono">{mockPlayerStats.averageScore.toLocaleString()}</div>
+          <div className="text-gray-400 text-sm font-mono">ACHIEVEMENTS</div>
+          <div className="text-green-400 text-xl font-bold font-mono">
+            {playerStats.game_stats.achievements_unlocked} / {playerStats.game_stats.total_achievements}
+          </div>
         </Card>
       </div>
-      <Card className="bg-gray-800 border-gray-600 p-4">
-        <div className="text-gray-400 text-sm font-mono">TOTAL PLAYTIME</div>
-        <div className="text-white text-xl font-bold font-mono">{mockPlayerStats.totalTimePlayed}</div>
-      </Card>
-      <Card className="bg-gray-800 border-gray-600 p-4">
-        <div className="text-gray-400 text-sm font-mono">FAVORITE POWER-UP</div>
-        <div className="text-yellow-400 text-xl font-bold font-mono">{mockPlayerStats.favoritePowerUp}</div>
-      </Card>
-    </div>
-  );
+    );
+  };
 
   const renderAchievements = () => (
     <div className="space-y-3">
       <h3 className="text-xl font-bold text-cyan-400 font-mono mb-4">ACHIEVEMENTS</h3>
-      <div className="space-y-2 max-h-96 overflow-y-auto">
-        {mockAchievements.map((achievement) => (
-          <Card key={achievement.id} className={`border p-4 ${
-            achievement.unlocked 
-              ? 'bg-gray-800 border-green-500' 
-              : 'bg-gray-900 border-gray-600'
-          }`}>
-            <div className="flex justify-between items-center">
-              <div>
-                <div className={`font-mono font-bold ${
-                  achievement.unlocked ? 'text-green-400' : 'text-gray-500'
-                }`}>
-                  {achievement.name}
+      {loading ? (
+        <div className="text-center text-gray-400 font-mono">Loading achievements...</div>
+      ) : achievements.length === 0 ? (
+        <div className="text-center text-gray-400 font-mono">No achievements available</div>
+      ) : (
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {achievements.map((achievement) => (
+            <Card key={achievement.id} className={`border p-4 ${
+              achievement.unlocked 
+                ? 'bg-gray-800 border-green-500' 
+                : 'bg-gray-900 border-gray-600'
+            }`}>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">{achievement.icon}</div>
+                  <div>
+                    <div className={`font-mono font-bold ${
+                      achievement.unlocked ? 'text-green-400' : 'text-gray-500'
+                    }`}>
+                      {achievement.name}
+                    </div>
+                    <div className="text-gray-400 text-sm font-mono">
+                      {achievement.description}
+                    </div>
+                    {achievement.unlocked && achievement.unlocked_at && (
+                      <div className="text-gray-500 text-xs font-mono">
+                        Unlocked: {new Date(achievement.unlocked_at).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="text-gray-400 text-sm font-mono">
-                  {achievement.description}
+                <div className="flex flex-col items-end gap-1">
+                  {achievement.unlocked ? (
+                    <Badge className="bg-green-500 text-black font-mono">UNLOCKED</Badge>
+                  ) : (
+                    <Badge variant="outline" className="border-gray-600 text-gray-500 font-mono">LOCKED</Badge>
+                  )}
+                  <div className="text-yellow-400 text-sm font-mono">{achievement.points} pts</div>
                 </div>
               </div>
-              <div>
-                {achievement.unlocked ? (
-                  <Badge className="bg-green-500 text-black font-mono">UNLOCKED</Badge>
-                ) : (
-                  <Badge variant="outline" className="border-gray-600 text-gray-500 font-mono">LOCKED</Badge>
-                )}
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 
@@ -117,6 +255,16 @@ const MainMenu = ({ onStartGame, onShowInstructions }) => {
           <p className="text-xl text-gray-300 font-mono">
             Defend the Galaxy • Destroy • Survive • Conquer
           </p>
+          {currentPlayer && (
+            <p className="text-sm text-gray-400 font-mono mt-2">
+              Welcome, {currentPlayer.username}
+            </p>
+          )}
+          {!apiConnected && (
+            <p className="text-sm text-red-400 font-mono mt-2">
+              ⚠️ Offline Mode - Limited functionality
+            </p>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -163,7 +311,8 @@ const MainMenu = ({ onStartGame, onShowInstructions }) => {
               <div className="flex flex-col gap-4 max-w-xs mx-auto">
                 <Button 
                   onClick={onStartGame}
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-black font-bold py-4 px-8 text-xl font-mono transform hover:scale-105 transition-all duration-200"
+                  disabled={!currentPlayer}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-black font-bold py-4 px-8 text-xl font-mono transform hover:scale-105 transition-all duration-200 disabled:opacity-50"
                 >
                   START MISSION
                 </Button>
